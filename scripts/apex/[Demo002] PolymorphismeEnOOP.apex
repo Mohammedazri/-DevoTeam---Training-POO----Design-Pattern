@@ -12,3 +12,7 @@ for (Shape s : shapes) {
     else                           typeName = 'Triangle';
     System.debug('Area of ' + typeName + ' = ' + s.calculateArea());
 }
+
+22:59:32.53 (55244452)|USER_DEBUG|[13]|DEBUG|Area of Circle = 78.539816339744825
+22:59:32.53 (55331868)|USER_DEBUG|[13]|DEBUG|Area of Square = 16
+22:59:32.53 (55407786)|USER_DEBUG|[13]|DEBUG|Area of Triangle = 5.0
