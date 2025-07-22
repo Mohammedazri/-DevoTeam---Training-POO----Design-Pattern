@@ -1,1 +1,1 @@
-### La Prépation du ReadMe est encors!!
+### La préparation du README est encore en cours !
