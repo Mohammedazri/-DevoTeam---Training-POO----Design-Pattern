@@ -18,6 +18,7 @@
 
         // Affiche toutes les infos via la méthode de la sous‑classe
         e.afficherInfos();
+        
 23:18:43.169 (212893743)|USER_DEBUG|[12]|DEBUG|Age (public) : 30
 23:18:43.169 (212984645)|USER_DEBUG|[17]|DEBUG|SSN via getter : 123‑45‑6789
 23:18:43.169 (213055989)|USER_DEBUG|[12]|DEBUG|Nom : Dupont, Age : 30, Poste : Développeur, SSN : 123‑45‑6789
