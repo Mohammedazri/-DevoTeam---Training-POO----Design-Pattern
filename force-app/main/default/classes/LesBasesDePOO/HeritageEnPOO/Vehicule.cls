@@ -1,4 +1,5 @@
 // Classe de base
+
 public virtual class Vehicule {
     // Attribut protégé – toute sous-classe dans le même namespace y accède
     protected String couleur;
