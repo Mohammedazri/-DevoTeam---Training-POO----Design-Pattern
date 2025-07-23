@@ -9,5 +9,4 @@ public class Article {
         this.code  = code;
         this.label = label;
     }
-    
 }

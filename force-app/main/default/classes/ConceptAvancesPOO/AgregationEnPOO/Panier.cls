@@ -7,7 +7,6 @@ public class Panier {
     public Panier() {
         this.articles = new List<Article>();
     }
-    
 
     // Méthode d'agrégation : on ajoute un article
     public void ajouter(Article a) {
