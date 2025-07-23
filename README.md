@@ -1,22 +1,18 @@
-
 # Formation d'Expert : POO & Design Patterns en Apex
 
-Ce document est un guide approfondi destiné aux développeurs Salesforce qui souhaitent maîtriser la **Programmation Orientée Objet (POO)** et les **Design Patterns**. L'objectif n'est pas seulement de comprendre la théorie, mais de devenir un expert capable de concevoir des solutions Apex robustes, maintenables et évolutives.
+Ce document est un guide de référence approfondi pour les développeurs Salesforce visant la maîtrise de la **Programmation Orientée Objet (POO)** et des **Design Patterns** en Apex. Chaque section est structurée pour fournir une compréhension conceptuelle, une visualisation architecturale, et une analyse du code source réel présent dans ce projet.
 
 ---
 
 ## Partie 1 : Les Piliers de la Programmation Orientée Objet (POO)
 
-La POO est plus qu'une technique, c'est une philosophie de conception. Elle nous permet de modéliser le monde réel sous forme d'objets logiciels qui interagissent entre eux. Maîtriser ses piliers est la première étape pour écrire du code propre et professionnel.
+La POO est une philosophie de conception qui nous permet de modéliser des problèmes complexes sous forme d'objets logiciels autonomes et interactifs.
 
-### 1. L'Héritage : Créer des Hiérarchies et Réutiliser
+### 1. L'Héritage (`/LesBasesDePOO/HeritageEnPOO`)
 
-**Le Concept d'Expert :** L'héritage modélise une relation **"EST UN(E)"**. Une `Voiture` EST UN `Vehicule`. Ce n'est pas seulement une question de réutilisation du code ; il s'agit de créer une taxonomie, un langage commun pour votre domaine d'application. En établissant une hiérarchie claire, vous rendez votre code plus intuitif et plus facile à comprendre pour les autres développeurs.
+**Concept d'Expert :** L'héritage modélise une relation **"EST UN(E)"**. Il permet de créer une hiérarchie de classes où les sous-classes héritent des caractéristiques (propriétés et méthodes) de leur super-classe. L'objectif est la réutilisabilité et la création d'une taxonomie claire.
 
-**Dans le contexte Salesforce :** Pensez à la manière dont tous les objets Salesforce (Account, Contact, etc.) héritent implicitement d'un `SObject`. C'est pour cela qu'on peut les traiter de manière générique pour les opérations DML.
-
-#### Diagramme de Classes Simplifié
-
+#### Diagramme de Classes
 ```mermaid
 classDiagram
     direction TD
@@ -36,27 +32,36 @@ classDiagram
     Vehicule <|-- Voiture : "Voiture EST UN Vehicule"
     Vehicule <|-- Avion : "Avion EST UN Vehicule"
 ```
-*Légende : La flèche `A <|-- B` signifie que B hérite de A.*
 
-#### Analyse de la Démo
-Le code de la démo illustre parfaitement ce principe. `Voiture` et `Avion` n'ont pas besoin de redéfinir `demarrerMoteur()`. Ils l'acquièrent "gratuitement" de `Vehicule`. Le véritable pouvoir ici est que si vous devez modifier la logique de démarrage pour *tous* les véhicules (par exemple, pour ajouter un log), vous ne le faites qu'à un seul endroit : la classe `Vehicule`.
+#### Analyse du Code Source
+- **`Vehicule.cls`** définit le comportement commun. C'est la base de notre hiérarchie.
+- **`Voiture.cls`** étend `Vehicule` en utilisant le mot-clé `extends`. Elle hérite de `demarrerMoteur()` et y ajoute son propre comportement `ouvrirCoffre()`.
 
+*Extrait de `Voiture.cls`:*
 ```apex
-// Fichier : [Demo001] HeritageEnOOP.apex
-// Instanciation d’une Voiture
-Voiture maVoiture = new Voiture('rouge', 4);
-maVoiture.demarrerMoteur(); // Appel d'une méthode héritée
-maVoiture.ouvrirCoffre();   // Appel d'une méthode spécifique
+public class Voiture extends Vehicule {
+    public Integer nombreDePortes;
+
+    public Voiture(String couleur, Integer nombreDePortes) {
+        super(couleur); // Appel au constructeur de la classe mère
+        this.nombreDePortes = nombreDePortes;
+    }
+
+    public void ouvrirCoffre() {
+        System.debug('Ouverture du coffre de la voiture à ' + this.nombreDePortes + ' portes.');
+    }
+}
 ```
+
+**Utilisation :** Le script `[Demo001] HeritageEnOOP.apex` montre comment instancier et utiliser ces classes.
 
 ---
 
-### 2. Le Polymorphisme : Un Comportement, Plusieurs Formes
+### 2. Le Polymorphisme (`/LesBasesDePOO/PolymorphismeEnPOO`)
 
-**Le Concept d'Expert :** Le polymorphisme est le pilier qui permet le découplage le plus puissant. Il signifie qu'un code client peut manipuler des objets via une interface ou une classe de base commune sans connaître leur type concret. Le code client demande une action (`calculateArea()`), et c'est l'objet lui-même qui sait comment la réaliser. Cela rend les systèmes extensibles : vous pouvez ajouter de nouvelles `Shape`s (ex: `Rectangle`, `Hexagone`) sans jamais modifier la boucle de calcul qui parcourt la liste.
+**Concept d'Expert :** Le polymorphisme ("plusieurs formes") permet de traiter des objets de types différents de manière uniforme via une interface ou une classe de base commune. Le code client dépend de l'abstraction (`Shape`) et non des implémentations concrètes (`Circle`, `Square`). Cela rend le système extensible et respecte le [Principe d'Inversion de Dépendances](https://en.wikipedia.org/wiki/Dependency_inversion_principle).
 
-#### Diagramme de Classes Simplifié
-
+#### Diagramme de Classes
 ```mermaid
 classDiagram
     direction TD
@@ -71,135 +76,157 @@ classDiagram
     Shape <|-- Circle
     Shape <|-- Square
     Shape <|-- Triangle
-
-    class Client{
-        calculerToutesLesAires(List<Shape>)
-    }
-    Client ..> Shape : "Le client dépend de l'abstraction, pas des détails"
 ```
-*Légende : La ligne pointillée `A ..> B` signifie que A dépend de B.*
 
-#### Analyse de la Démo
-La magie est dans la `List<Shape>`. Cette liste contient des objets hétérogènes (`Circle`, `Square`, `Triangle`). Pourtant, la boucle `for` les traite tous de la même manière, comme de simples `Shape`. Quand `s.calculateArea()` est appelé, le système d'exécution d'Apex (runtime) détermine le type réel de `s` et invoque la méthode `override` correspondante. C'est l'essence même du polymorphisme.
+#### Analyse du Code Source
+- **`Shape.cls`** est une classe `abstract` qui définit un contrat : toute classe qui en hérite *doit* fournir une implémentation pour la méthode `calculateArea()`.
+- **`Circle.cls`** et les autres formes héritent de `Shape` et utilisent `override` pour fournir leur propre logique de calcul.
 
+*Extrait de `Circle.cls`:*
 ```apex
-// Fichier : [Demo002] PolymorphismeEnOOP.apex
-List<Shape> shapes = new List<Shape>{ /* ... */ };
+public class Circle extends Shape {
+    private Double radius;
 
-// Cette boucle est stable. Elle n'a pas besoin de changer
-// si on ajoute une nouvelle forme demain.
-for (Shape s : shapes) {
-    // L'appel est le même, mais le résultat dépend du type réel de 's'
-    System.debug('Area = ' + s.calculateArea());
+    public Circle(Double r) {
+        this.radius = r;
+    }
+
+    public override Double calculateArea() {
+        return Math.PI * this.radius * this.radius;
+    }
 }
 ```
 
+**Utilisation :** Le script `[Demo002] PolymorphismeEnOOP.apex` illustre comment une liste de `Shape` peut contenir différents types d'objets et comment l'appel à `calculateArea()` exécute la bonne version de la méthode.
+
 ---
 
-### 3. L'Encapsulation : Protéger l'Intégrité de l'Objet
+### 3. L'Encapsulation (`/LesBasesDePOO/EncapsulationEnPOO`)
 
-**Le Concept d'Expert :** L'encapsulation n'est pas juste une question de cacher des données avec le mot-clé `private`. C'est une question de **responsabilité**. Un objet doit être responsable de la cohérence de son propre état. En exposant des méthodes publiques (comme `getNumeroSecuriteSociale`) au lieu de variables publiques, l'objet conserve le contrôle. Il peut valider les données, déclencher des logiques, notifier d'autres objets, etc., chaque fois que son état est consulté ou modifié. Vous créez des objets qui sont des gardiens fiables de leurs propres données.
+**Concept d'Expert :** L'encapsulation consiste à lier les données (attributs) et les méthodes qui les manipulent au sein d'un même objet, tout en cachant l'état interne de cet objet au monde extérieur. L'accès aux données est contrôlé par des méthodes publiques (getters/setters). L'objet est seul responsable de la validité de son propre état.
 
-#### Diagramme de Classes Simplifié
-
+#### Diagramme de Classes
 ```mermaid
 classDiagram
     class Employe{
         -String numeroSecuriteSociale
         +getNumeroSecuriteSociale()
-        -setNumeroSecuriteSociale(String ssn)
     }
 ```
 
-#### Analyse de la Démo
-L'exemple montre que l'accès direct à `numeroSecuriteSociale` est interdit. C'est la base. Mais imaginez que le `setter` (non montré dans la démo mais implicite) contienne une logique de validation : `if (ssn.length() != 11) { throw new Exception(...); }`. L'encapsulation garantit que personne ne peut contourner cette validation. L'objet `Employe` garantit qu'il ne peut jamais exister dans un état invalide (avec un SSN mal formé).
+#### Analyse du Code Source
+- **`Employe.cls`** : Le champ `numeroSecuriteSociale` est déclaré `private`, le rendant inaccessible depuis l'extérieur de la classe. Une méthode publique `getNumeroSecuriteSociale()` est fournie pour permettre un accès en lecture seule et contrôlé.
 
+*Extrait de `Employe.cls`:*
 ```apex
-// Fichier : [Demo003] EncapsulationEnOOP.apex
-Employe e = new Employe(...);
+public class Employe extends Personne {
+    private String numeroSecuriteSociale;
+    public String poste;
 
-// INTERDIT : Le code externe ne peut pas corrompre l'état de l'objet.
-// e.numeroSecuriteSociale = 'invalide'; // Erreur de compilation
+    // ... constructeur ...
 
-// AUTORISÉ : On passe par le point d'accès contrôlé.
-String ssn = e.getNumeroSecuriteSociale();
+    public String getNumeroSecuriteSociale() {
+        // On pourrait ajouter ici une logique de sécurité
+        // (ex: vérifier les permissions de l'utilisateur courant)
+        return this.numeroSecuriteSociale;
+    }
+}
 ```
+
+**Utilisation :** Le script `[Demo003] EncapsulationEnOOP.apex` montre qu'un appel direct à `e.numeroSecuriteSociale` échouerait, forçant l'utilisation du getter.
 
 ---
 
 ## Partie 2 : Les Design Patterns
 
-Les Design Patterns sont des solutions architecturales éprouvées. Les connaître, c'est comme avoir une boîte à outils de plans pour construire des logiciels de qualité.
+Les Design Patterns sont des solutions architecturales réutilisables à des problèmes de conception logicielle courants.
 
-### 1. Strategy : Rendre les Algorithmes Interchangeables
+### 1. Strategy (`/SystemDesignPatterns/Strategy`)
 
-**Le Concept d'Expert :** Le pattern Strategy est l'antidote aux instructions `if-else-if` ou `switch` interminables. Il repose sur le principe de **délégation**. Le contexte (ici, `ShippingService`) ne réalise pas l'algorithme lui-même ; il délègue cette responsabilité à un objet "stratégie" distinct. Le véritable avantage dans Salesforce est de pouvoir charger ces stratégies dynamiquement, par exemple à partir de **Custom Metadata Types**. Cela transforme une modification de logique métier (changer un calcul de frais de port) d'une tâche de développeur (déploiement de code) à une tâche d'administrateur (modification d'un enregistrement de metadata).
+**Concept d'Expert :** Le pattern Strategy permet de définir une famille d'algorithmes, de les encapsuler dans des classes séparées et de les rendre interchangeables. Le contexte délègue l'exécution de l'algorithme à un objet stratégie. C'est une alternative propre aux blocs conditionnels complexes (`if/else`).
 
-#### Diagramme de Classes Simplifié
-
+#### Diagramme de Classes
 ```mermaid
 classDiagram
     direction LR
-    class ShippingService{
-      +calculate(strategy)
+    class ShippingService
+    class ShippingStrategyFactory{
+        +getStrategy(String key)
     }
     class IShippingStrategy{
       <<interface>>
-      calculateFee()
+      calculate(Decimal amount)
     }
-    class StandardShipping{ +calculateFee() }
-    class ExpressShipping{ +calculateFee() }
+    class StandardShipping
+    class ExpressShipping
 
-    ShippingService o--> IShippingStrategy : "utilise une stratégie"
-    IShippingStrategy <|.. StandardShipping
-    IShippingStrategy <|.. ExpressShipping
+    ShippingService o--> IShippingStrategy : utilise
+    ShippingStrategyFactory ..> IShippingStrategy : crée
+    IShippingStrategy <|.. StandardShipping : implements
+    IShippingStrategy <|.. ExpressShipping : implements
 ```
-*Légende : La flèche `A o--> B` signifie que A a une relation d'agrégation avec B.*
 
-#### Analyse de la Démo
-La démo est particulièrement puissante car elle ne se contente pas d'implémenter le pattern, elle l'intègre aux fonctionnalités de la plateforme. Le `ShippingService` reçoit une clé. Au lieu de faire un `if (key == 'Standard')`, il recherche un enregistrement de Custom Metadata correspondant à cette clé. Cet enregistrement contient le nom de la classe Apex qui implémente la stratégie. Le service utilise ensuite `Type.forName(...).newInstance()` pour créer dynamiquement l'objet stratégie adéquat. C'est flexible, maintenable et aligné avec les meilleures pratiques Salesforce.
+#### Analyse du Code Source
+- **`ShippingStrategy.cls`** est l'interface qui définit le contrat pour toutes les stratégies.
+- **`StandardShipping.cls`**, **`ExpressShipping.cls`**, etc., sont les implémentations concrètes de l'algorithme.
+- **`ShippingStrategyFactory.cls`** (une Factory) est responsable de sélectionner et d'instancier la bonne stratégie, souvent en se basant sur des Custom Metadata, ce qui rend le système configurable sans modification du code.
 
+*Extrait de `ShippingStrategyFactory.cls`:*
 ```apex
-// Fichier : [Demo011] Strategy-via-Custom-Metadata.apex
-// Le client ne connaît que des clés, pas des classes Apex.
-List<String> keys = new List<String>{ 'Standard', 'Express', 'Free200' };
-
-for (String key : keys) {
-    // Le ShippingService trouve la bonne classe stratégie via la metadata,
-    // l'instancie, et l'utilise.
-    Decimal fee = ShippingService.calculate(key, 150);
+public class ShippingStrategyFactory {
+    public static IShippingStrategy getStrategy(String strategyName) {
+        // Logique pour trouver le nom de la classe Apex
+        // dans un Custom Metadata Type basé sur strategyName
+        // ...
+        // Instanciation dynamique
+        Type t = Type.forName(metadata.ApexClass__c);
+        return (IShippingStrategy) t.newInstance();
+    }
 }
 ```
 
-### 2. Observer : Notifier les Changements sans Couplage
+**Utilisation :** Le script `[Demo011] Strategy‐via‐Custom‐Metadata.apex` montre comment le `ShippingService` utilise la factory pour obtenir la bonne stratégie et calculer les frais.
 
-**Le Concept d'Expert :** Le pattern Observer résout un problème fondamental : comment des objets peuvent-ils réagir à des événements qui se produisent dans d'autres objets sans être directement liés à eux ? La solution est un mécanisme de diffusion où un "sujet" publie des notifications et des "observateurs" s'y abonnent. Dans Salesforce, les **Platform Events** sont l'implémentation parfaite et native de ce pattern. Ils créent un découplage total : le publicateur n'a aucune connaissance des abonnés. Cela permet de construire des architectures événementielles, résilientes et qui respectent les limites de la plateforme en découpant le travail en transactions courtes et indépendantes.
+---
 
-#### Diagramme de Séquence Simplifié
+### 2. Observer (`/SystemDesignPatterns/Observer`)
 
+**Concept d'Expert :** Le pattern Observer établit une relation un-à-plusieurs entre des objets, de sorte que lorsqu'un objet (le Sujet) change d'état, tous ses dépendants (les Observateurs) sont notifiés et mis à jour automatiquement. Dans Salesforce, les **Platform Events** sont l'implémentation native, asynchrone et découplée de ce pattern.
+
+#### Diagramme de Séquence
 ```mermaid
 sequenceDiagram
     participant P as PriceChangeService
-    participant B as Event Bus
+    participant B as Salesforce Event Bus
     participant E as EmailPriceAlert (Trigger)
     participant S as SmsPriceAlert (Trigger)
 
-    P->>B: 1. Publie PriceChange__e
-    B-->>E: 2. Notifie l'abonné Email
-    B-->>S: 3. Notifie l'abonné SMS
+    P->>B: 1. Publie l'événement `PriceChange__e`
+    B-->>E: 2. Notifie l'abonné (Trigger on PriceChange__e)
+    B-->>S: 3. Notifie l'autre abonné
 ```
 
-#### Analyse de la Démo
-Le `PriceChangeService` fait une seule chose : il publie un `PriceChange__e`. Il ne sait pas et ne se soucie pas de savoir si un email doit être envoyé, si un SMS est nécessaire, ou si un système externe doit être appelé. Les classes `EmailPriceAlert` et `SmsPriceAlert` (implémentées sous forme de triggers sur le Platform Event) sont les observateurs. Vous pouvez ajouter un troisième observateur demain (par exemple, `PushNotificationAlert`) en ajoutant simplement un nouveau trigger, sans jamais toucher au code du `PriceChangeService`. C'est le summum du découplage.
+#### Analyse du Code Source
+- **`PriceChangePublisher.cls`** (le Sujet) est responsable de la publication de l'événement `PriceChange__e` sur le bus d'événements Salesforce. Il ne connaît pas ses observateurs.
+- **`EmailPriceAlert.cls`** (un Observateur) est un trigger Apex sur l'objet `PriceChange__e`. Il s'exécute automatiquement chaque fois qu'un nouvel événement est publié.
 
+*Extrait de `PriceChangePublisher.cls`:*
 ```apex
-// Fichier : [Demo010] Observer.apex
-// Le service se contente de crier "Le prix a changé !" dans le vide.
-PriceChangeService.checkAndPublish(oldList, newList);
-
-// En coulisses, les triggers abonnés à cet événement se réveillent
-// et font leur travail, chacun dans sa propre transaction.
+public class PriceChangePublisher {
+    public static void publish(Set<Id> productIds, Decimal newPrice) {
+        List<PriceChange__e> events = new List<PriceChange__e>();
+        for (Id prodId : productIds) {
+            events.add(new PriceChange__e(ProductId__c = prodId, NewPrice__c = newPrice));
+        }
+        EventBus.publish(events);
+    }
+}
 ```
+
+**Utilisation :** Le script `[Demo010] Observer.apex` simule une mise à jour de prix, qui appelle le service, qui à son tour publie l'événement, déclenchant les processus d'alerte en arrière-plan.
 
 ---
+
+*Ce document a été généré en se basant sur l'analyse des fichiers de classes (`.cls`) présents dans le répertoire `force-app/main/default/classes/`.*
+
 Ce projet a été créé par **@[DevoTeam]**.
