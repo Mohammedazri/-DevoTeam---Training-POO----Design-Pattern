@@ -1,576 +1,203 @@
+# Formation d'Expert : POO & Design Patterns en Apex
 
-# Formation Approfondie : POO & Design Patterns en Apex
+Ce document est un guide approfondi destiné aux développeurs Salesforce qui souhaitent maîtriser la **Programmation Orientée Objet (POO)** et les **Design Patterns**. L'objectif n'est pas seulement de comprendre la théorie, mais de devenir un expert capable de concevoir des solutions Apex robustes, maintenables et évolutives.
 
-Bienvenue dans ce référentiel dédié à l'apprentissage avancé de la **Programmation Orientée Objet (POO)** et des **Design Patterns** avec le langage Apex de Salesforce. Ce document sert de guide complet, non seulement pour comprendre la théorie, mais aussi pour voir comment ces concepts sont appliqués dans des scénarios concrets grâce à des démonstrations de code.
+---
 
 ## Partie 1 : Les Piliers de la Programmation Orientée Objet (POO)
 
-La POO est un paradigme de programmation qui utilise des "objets" pour concevoir des applications et des logiciels. Ces objets, qui sont des instances de classes, combinent des données (attributs) et des comportements (méthodes).
+La POO est plus qu'une technique, c'est une philosophie de conception. Elle nous permet de modéliser le monde réel sous forme d'objets logiciels qui interagissent entre eux. Maîtriser ses piliers est la première étape pour écrire du code propre et professionnel.
 
----
+### 1. L'Héritage : Créer des Hiérarchies et Réutiliser
 
-### 1. L'Héritage
+**Le Concept d'Expert :** L'héritage modélise une relation **"EST UN(E)"**. Une `Voiture` EST UN `Vehicule`. Ce n'est pas seulement une question de réutilisation du code ; il s'agit de créer une taxonomie, un langage commun pour votre domaine d'application. En établissant une hiérarchie claire, vous rendez votre code plus intuitif et plus facile à comprendre pour les autres développeurs.
 
-> **L'héritage** est un mécanisme qui permet à une nouvelle classe (dite "classe fille" ou "sous-classe") de réutiliser, étendre et modifier le comportement défini dans une autre classe (dite "classe mère" ou "super-classe"). Le principal avantage est la réutilisabilité du code et la création d'une hiérarchie logique entre les classes.
+**Dans le contexte Salesforce :** Pensez à la manière dont tous les objets Salesforce (Account, Contact, etc.) héritent implicitement d'un `SObject`. C'est pour cela qu'on peut les traiter de manière générique pour les opérations DML.
 
-#### Diagramme de Classes
+#### Diagramme de Classes Simplifié
+
 ```mermaid
 classDiagram
+    direction TD
     class Vehicule{
-        +String couleur
-        +demarrerMoteur()
-        +arreterMoteur()
+      +String couleur
+      +demarrerMoteur()
+      +arreterMoteur()
     }
     class Voiture{
-        +Integer nombreDePortes
-        +ouvrirCoffre()
+      +Integer nombreDePortes
+      +ouvrirCoffre()
     }
     class Avion{
-        +deployerTrainAtterrissage()
+      +deployerTrainAtterrissage()
     }
 
-    Vehicule <|-- Voiture : hérite de
-    Vehicule <|-- Avion : hérite de
+    Vehicule <|-- Voiture : "Voiture EST UN Vehicule"
+    Vehicule <|-- Avion : "Avion EST UN Vehicule"
 ```
+*Légende : La flèche `A <|-- B` signifie que B hérite de A.*
 
-#### Analyse de l'implémentation Apex
-Dans cet exemple, `Vehicule` est la classe de base qui définit des attributs et des méthodes communs à tous les véhicules. `Voiture` and `Avion` héritent de `Vehicule`. Elles bénéficient ainsi automatiquement des méthodes `demarrerMoteur()` et `arreterMoteur()`, sans avoir à les réécrire. De plus, elles peuvent ajouter leurs propres spécificités (`ouvrirCoffre()` pour la voiture).
+#### Analyse de la Démo
+Le code de la démo illustre parfaitement ce principe. `Voiture` et `Avion` n'ont pas besoin de redéfinir `demarrerMoteur()`. Ils l'acquièrent "gratuitement" de `Vehicule`. Le véritable pouvoir ici est que si vous devez modifier la logique de démarrage pour *tous* les véhicules (par exemple, pour ajouter un log), vous ne le faites qu'à un seul endroit : la classe `Vehicule`.
 
-#### Démonstration
 ```apex
 // Fichier : [Demo001] HeritageEnOOP.apex
-// un script Execute Anonymous
-
 // Instanciation d’une Voiture
 Voiture maVoiture = new Voiture('rouge', 4);
-maVoiture.demarrerMoteur(); // Méthode héritée de Vehicule
-maVoiture.ouvrirCoffre();   // Méthode propre à Voiture
-maVoiture.arreterMoteur();  // Méthode héritée de Vehicule
-
-// Instanciation d’un Avion
-Avion monAvion = new Avion('blanc');
-monAvion.demarrerMoteur(); // Méthode héritée de Vehicule
-monAvion.arreterMoteur();  // Méthode héritée de Vehicule
+maVoiture.demarrerMoteur(); // Appel d'une méthode héritée
+maVoiture.ouvrirCoffre();   // Appel d'une méthode spécifique
 ```
 
 ---
 
-### 2. Le Polymorphisme
+### 2. Le Polymorphisme : Un Comportement, Plusieurs Formes
 
-> **Le polymorphisme** (du grec "plusieurs formes") permet d'utiliser un objet d'une classe fille partout où un objet de sa classe mère est attendu. Concrètement, cela permet d'appeler la même méthode sur des objets de types différents et d'obtenir un comportement spécifique à chaque type. En Apex, cela est souvent réalisé en déclarant une méthode `virtual` dans la classe mère et en la redéfinissant avec `override` dans les classes filles.
+**Le Concept d'Expert :** Le polymorphisme est le pilier qui permet le découplage le plus puissant. Il signifie qu'un code client peut manipuler des objets via une interface ou une classe de base commune sans connaître leur type concret. Le code client demande une action (`calculateArea()`), et c'est l'objet lui-même qui sait comment la réaliser. Cela rend les systèmes extensibles : vous pouvez ajouter de nouvelles `Shape`s (ex: `Rectangle`, `Hexagone`) sans jamais modifier la boucle de calcul qui parcourt la liste.
 
-#### Diagramme de Classes
+#### Diagramme de Classes Simplifié
+
 ```mermaid
 classDiagram
+    direction TD
     class Shape{
-        <<abstract>>
-        +calculateArea()
+      <<abstract>>
+      +calculateArea()
     }
-    class Circle{
-        +Double radius
-        +calculateArea()
-    }
-    class Square{
-        +Double side
-        +calculateArea()
-    }
-    class Triangle{
-        +Double base
-        +Double height
-        +calculateArea()
-    }
+    class Circle{ +calculateArea() }
+    class Square{ +calculateArea() }
+    class Triangle{ +calculateArea() }
 
     Shape <|-- Circle
     Shape <|-- Square
     Shape <|-- Triangle
+
+    class Client{
+        +calculerToutesLesAires(List<Shape>)
+    }
+    Client ..> Shape : "Le client dépend de l'abstraction, pas des détails"
 ```
+*Légende : La ligne pointillée `A ..> B` signifie que A dépend de B.*
 
-#### Analyse de l'implémentation Apex
-`Shape` est une classe abstraite qui définit un "contrat" : toute forme doit pouvoir calculer son aire (`calculateArea`). `Circle`, `Square`, et `Triangle` sont des implémentations concrètes. On peut les stocker dans une `List<Shape>` et appeler `calculateArea()` sur chaque élément. Apex exécutera la version correcte de la méthode en fonction du type réel de l'objet au moment de l'exécution.
+#### Analyse de la Démo
+La magie est dans la `List<Shape>`. Cette liste contient des objets hétérogènes (`Circle`, `Square`, `Triangle`). Pourtant, la boucle `for` les traite tous de la même manière, comme de simples `Shape`. Quand `s.calculateArea()` est appelé, le système d'exécution d'Apex (runtime) détermine le type réel de `s` et invoque la méthode `override` correspondante. C'est l'essence même du polymorphisme.
 
-#### Démonstration
 ```apex
 // Fichier : [Demo002] PolymorphismeEnOOP.apex
-List<Shape> shapes = new List<Shape>{
-    new Circle(5),
-    new Square(4),
-    new Triangle(5, 2)
-};
+List<Shape> shapes = new List<Shape>{ /* ... */ };
 
-// Grâce au polymorphisme, on parcourt la liste unifiée
-// et on appelle la même méthode sur des objets différents.
+// Cette boucle est stable. Elle n'a pas besoin de changer
+// si on ajoute une nouvelle forme demain.
 for (Shape s : shapes) {
-    String typeName;
-    if (s instanceof Circle)      typeName = 'Circle';
-    else if (s instanceof Square) typeName = 'Square';
-    else                          typeName = 'Triangle';
-    System.debug('Area of ' + typeName + ' = ' + s.calculateArea());
+    // L'appel est le même, mais le résultat dépend du type réel de 's'
+    System.debug('Area = ' + s.calculateArea());
 }
 ```
 
 ---
 
-### 3. L'Encapsulation
+### 3. L'Encapsulation : Protéger l'Intégrité de l'Objet
 
-> **L'encapsulation** est le principe de cacher l'état interne d'un objet et de ne permettre l'interaction qu'à travers des méthodes publiques (getters/setters). Cela protège l'intégrité des données de l'objet, empêche les modifications accidentelles et permet de faire évoluer l'implémentation interne sans impacter le code qui l'utilise.
+**Le Concept d'Expert :** L'encapsulation n'est pas juste une question de cacher des données avec le mot-clé `private`. C'est une question de **responsabilité**. Un objet doit être responsable de la cohérence de son propre état. En exposant des méthodes publiques (comme `getNumeroSecuriteSociale`) au lieu de variables publiques, l'objet conserve le contrôle. Il peut valider les données, déclencher des logiques, notifier d'autres objets, etc., chaque fois que son état est consulté ou modifié. Vous créez des objets qui sont des gardiens fiables de leurs propres données.
 
-#### Diagramme de Classes
+#### Diagramme de Classes Simplifié
+
 ```mermaid
 classDiagram
-    class Personne{
-        #String nom
-        #Integer age
-    }
     class Employe{
         -String numeroSecuriteSociale
-        +afficherInfos()
-        +getNumeroSecuriteSociale()
+        +String getNumeroSecuriteSociale()
+        -void setNumeroSecuriteSociale(String ssn)
     }
-    Personne <|-- Employe
 ```
 
-#### Analyse de l'implémentation Apex
-Dans l'exemple, `numeroSecuriteSociale` est `private`. Il est impossible d'y accéder directement depuis l'extérieur de la classe `Employe`. Pour obtenir sa valeur, le code externe est obligé de passer par la méthode publique `getNumeroSecuriteSociale()`. Cela permet à la classe `Employe` de contrôler l'accès (par exemple, ajouter une vérification de permissions avant de retourner la valeur).
+#### Analyse de la Démo
+L'exemple montre que l'accès direct à `numeroSecuriteSociale` est interdit. C'est la base. Mais imaginez que le `setter` (non montré dans la démo mais implicite) contienne une logique de validation : `if (ssn.length() != 11) { throw new Exception(...); }`. L'encapsulation garantit que personne ne peut contourner cette validation. L'objet `Employe` garantit qu'il ne peut jamais exister dans un état invalide (avec un SSN mal formé).
 
-#### Démonstration
 ```apex
 // Fichier : [Demo003] EncapsulationEnOOP.apex
-Employe e = new Employe('Dupont', 30, '123-45-6789', 'Développeur');
+Employe e = new Employe(...);
 
-// Accès public OK
-System.debug('Age (public) : ' + e.age);
+// INTERDIT : Le code externe ne peut pas corrompre l'état de l'objet.
+// e.numeroSecuriteSociale = 'invalide'; // Erreur de compilation
 
-// Accès direct au membre privé IMPOSSIBLE (génère une erreur de compilation)
-// System.debug('SSN direct : ' + e.numeroSecuriteSociale);
-
-// On doit utiliser le "getter" public
+// AUTORISÉ : On passe par le point d'accès contrôlé.
 String ssn = e.getNumeroSecuriteSociale();
-System.debug('SSN via getter : ' + ssn);
-
-e.afficherInfos();
 ```
 
----
-
-### 4. L'Abstraction
-
-> **L'abstraction** consiste à masquer la complexité de l'implémentation en exposant uniquement les fonctionnalités de haut niveau. Elle se concentre sur ce qu'un objet *fait* plutôt que sur comment il le *fait*. En Apex, l'abstraction est réalisée via des classes abstraites et des interfaces.
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    class NotificationService{
-        +static notifyUser(Notifier notifier, String message)
-    }
-    interface Notifier{
-        <<interface>>
-        +send(String message)
-    }
-    class EmailNotifier{
-        +send(String message)
-    }
-    class SmsNotifier{
-        +send(String message)
-    }
-
-    Notifier <|.. EmailNotifier : implements
-    Notifier <|.. SmsNotifier : implements
-    NotificationService ..> Notifier : uses
-```
-
-#### Analyse de l'implémentation Apex
-Le `NotificationService` ne sait pas comment un message est envoyé (par email, SMS, etc.). Il sait seulement qu'il a besoin d'un objet de type `Notifier` qui respecte le contrat défini par l'interface (la méthode `send`). On peut ainsi ajouter de nouveaux types de notificateurs (Push, Slack...) sans jamais avoir à modifier le `NotificationService`.
-
-#### Démonstration
-```apex
-// Fichier : [Demo004] AbstractionEnOOP.apex
-System.debug('--- Début démo Notification ---');
-
-// 1) Notification par e-mail
-Notifier email = new EmailNotifier();
-NotificationService.notifyUser(email, 'Votre rapport est prêt !');
-
-// 2) Notification par SMS
-Notifier sms = new SmsNotifier();
-NotificationService.notifyUser(sms, 'Vérifiez votre téléphone.');
-
-System.debug('--- Fin démo Notification ---');
-```
-
----
-
-### 5. L'Agrégation
-
-> **L'agrégation** est une relation de type "a un" (has-a) entre deux classes, où une classe (le tout) est composée d'une ou plusieurs autres classes (les parties). C'est une association faible : les objets "partie" peuvent exister indépendamment de l'objet "tout".
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    class Panier {
-        +ajouter(Article article)
-        +afficher()
-    }
-    class Article {
-        +String sku
-        +String nom
-    }
-    Panier o-- "0..*" Article : contient
-```
-
-#### Analyse de l'implémentation Apex
-Un `Panier` contient des `Article`s. Cependant, si on supprime un `Panier`, les `Article`s existent toujours et peuvent être ajoutés à un autre panier. Leur cycle de vie n'est pas lié.
-
-#### Démonstration
-```apex
-// Fichier : [Demo005] Agrégation en POO.apex
-// Création d'articles indépendants
-Article stylo  = new Article('A001', 'Stylo');
-Article cahier = new Article('A002', 'Cahier');
-
-// Deux paniers qui partagent le même article "cahier"
-Panier panier1 = new Panier();
-panier1.ajouter(stylo);
-panier1.ajouter(cahier);
-
-Panier panier2 = new Panier();
-panier2.ajouter(cahier); // Le même objet 'cahier'
-
-panier1.afficher();
-panier2.afficher();
-```
-
----
-
-### 6. La Composition
-
-> **La composition** est une forme forte d'agrégation. C'est aussi une relation "a un", mais ici, le cycle de vie des objets "partie" dépend de celui de l'objet "tout". Si l'objet "tout" est détruit, ses parties le sont aussi.
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    class Maison {
-        +ajouterPiece(String nom)
-    }
-    class Piece {
-        +String nom
-    }
-    Maison *-- "1..*" Piece : est composée de
-```
-
-#### Analyse de l'implémentation Apex
-Une `Maison` est composée de `Piece`s. Une `Piece` (comme un salon) ne peut pas exister sans une `Maison` à laquelle appartenir. Dans le code, la `Maison` est responsable de la création de ses `Piece`s.
-
-#### Démonstration
-```apex
-// Fichier : [Demo006] Composition en POO.apex
-Maison m = new Maison();
-m.ajouterPiece('Salon');
-m.ajouterPiece('Cuisine');
-
-for (Piece p : m.getPieces()) {
-    System.debug('Pièce : ' + p.nom);
-}
-// Si l'objet 'm' est détruit, les pièces qu'il contient n'ont plus de sens.
-```
-
----
-
-### 7. L'Implémentation Multiple d'Interfaces
-
-> Apex ne supporte pas l'héritage multiple de classes (une classe ne peut hériter que d'une seule autre classe). Cependant, une classe peut **implémenter plusieurs interfaces**. Cela lui permet d'hériter de plusieurs "comportements" ou "contrats" différents.
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    interface Imprimable {
-        <<interface>>
-        imprimer()
-    }
-    interface Exportable {
-        <<interface>>
-        exporter()
-    }
-    class Document {
-        imprimer()
-        exporter()
-    }
-    Imprimable <|.. Document
-    Exportable <|.. Document
-```
-
-#### Analyse de l'implémentation Apex
-La classe `Document` promet de fournir une implémentation pour les méthodes définies dans `Imprimable` ET `Exportable`. Cela permet de passer un objet `Document` à des méthodes qui attendent un `Imprimable` et à d'autres qui attendent un `Exportable`.
-
-#### Démonstration
-```apex
-// Fichier : [Demo007] Implémentation Multiple.apex
-Document doc = new Document();
-
-// On peut traiter l'objet 'doc' de différentes manières
-// en fonction de l'interface qui nous intéresse.
-DocumentService.traiterImpression(doc); // La méthode attend un Imprimable
-DocumentService.traiterExport(doc);   // La méthode attend un Exportable
-```
-
----
 ---
 
 ## Partie 2 : Les Design Patterns
 
-Les Design Patterns (ou patrons de conception) sont des solutions éprouvées à des problèmes de conception logicielle récurrents.
+Les Design Patterns sont des solutions architecturales éprouvées. Les connaître, c'est comme avoir une boîte à outils de plans pour construire des logiciels de qualité.
 
----
+### 1. Strategy : Rendre les Algorithmes Interchangeables
 
-### 1. Singleton
+**Le Concept d'Expert :** Le pattern Strategy est l'antidote aux instructions `if-else-if` ou `switch` interminables. Il repose sur le principe de **délégation**. Le contexte (ici, `ShippingService`) ne réalise pas l'algorithme lui-même ; il délègue cette responsabilité à un objet "stratégie" distinct. Le véritable avantage dans Salesforce est de pouvoir charger ces stratégies dynamiquement, par exemple à partir de **Custom Metadata Types**. Cela transforme une modification de logique métier (changer un calcul de frais de port) d'une tâche de développeur (déploiement de code) à une tâche d'administrateur (modification d'un enregistrement de metadata).
 
-> Le **Singleton** est un pattern de création qui garantit qu'une classe n'a qu'une seule et unique instance, tout en fournissant un point d'accès global à cette instance. C'est utile pour gérer des ressources partagées comme une connexion à une base de données, un service de logging, ou un cache.
+#### Diagramme de Classes Simplifié
 
-#### Diagramme de Classes
 ```mermaid
 classDiagram
-    class WSLogger{
-        -static WSLogger instance
-        -WSLogger()
-        +static getInstance() WSLogger
-        +recordLogAsync(String context, String message, Integer code)
+    direction LR
+    class ShippingService{
+      +calculate(strategy)
     }
-    WSLogger "1" -- "1" WSLogger : instance
-```
-
-#### Analyse de l'implémentation Apex
-Le constructeur de `WSLogger` est privé, ce qui empêche la création d'instances avec `new WSLogger()`. La seule façon d'obtenir un objet `WSLogger` est d'appeler la méthode statique `getInstance()`. Cette méthode crée l'instance si elle n'existe pas, ou retourne l'instance existante dans le cas contraire, garantissant son unicité au sein d'une transaction.
-
-#### Démonstration
-```apex
-// Fichier : [Demo008] Singleton.apex
-// Plusieurs clients dans différentes parties du code
-// appellent le logger, mais ils utilisent tous la MÊME instance.
-
-// Client 1
-try {
-    // ...
-} catch (Exception ex) {
-    // Pas de 'new', on utilise le point d'accès global
-    WSLogger.recordLogAsync('Client_001.fetchData', ex.getMessage(), 500);
-}
-
-// Client 2
-try {
-    // ...
-} catch (Exception ex) {
-    WSLogger.recordLogAsync('Client_002.fetchData', ex.getMessage(), 501);
-}
-```
-
----
-
-### 2. Factory Method
-
-> Le **Factory Method** est un pattern de création qui définit une interface pour créer un objet, mais laisse les sous-classes décider de la classe à instancier. Il permet de déléguer la logique d'instanciation à des sous-classes.
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    class NotificationService {
-        +static notify(String type, String recipient, String message)
+    interface IShippingStrategy{
+      <<interface>>
+      calculateFee()
     }
-    interface INotifier {
-        <<interface>>
-        send(String recipient, String message)
-    }
-    class EmailSender {
-        send(String recipient, String message)
-    }
-    class SmsSender {
-        send(String recipient, String message)
-    }
-    class PushSender {
-        send(String recipient, String message)
-    }
+    class StandardShipping{ +calculateFee() }
+    class ExpressShipping{ +calculateFee() }
 
-    INotifier <|.. EmailSender
-    INotifier <|.. SmsSender
-    INotifier <|.. PushSender
-    NotificationService ..> INotifier : creates
-```
-
-#### Analyse de l'implémentation Apex
-Le `NotificationService` agit comme une usine (Factory). En fonction du `type` fourni ('EMAIL', 'SMS', etc.), il instancie la classe `INotifier` appropriée et l'utilise pour envoyer le message. Le code client n'a pas besoin de connaître les classes concrètes (`EmailSender`, `SmsSender`).
-
-#### Démonstration
-```apex
-// Fichier : [Demo009] Factory Method.apex
-System.debug('=== Début de la démo Factory Method ===');
-
-List<String> types = new List<String>{ 'EMAIL', 'SMS', 'PUSH', 'SLACK', 'UNKNOWN' };
-
-for (String t : types) {
-    // Le client demande simplement un type de notification.
-    // La Factory se charge de créer le bon objet.
-    NotificationService.notify(t,
-        'recipient_placeholder',
-        'Bonjour via ' + t
-    );
-}
-
-System.debug('=== Fin de la démo Factory Method ===');
-```
-
----
-
-### 3. Observer
-
-> L'**Observer** est un pattern de comportement où un objet (le "sujet") maintient une liste de ses dépendants (les "observateurs") et les notifie automatiquement de tout changement d'état. Salesforce propose une implémentation native et puissante de ce pattern via les **Platform Events**.
-
-#### Diagramme de Classes (via Platform Events)
-```mermaid
-classDiagram
-    class PriceChangeService {
-        +checkAndPublish(List<PricebookEntry> oldList, List<PricebookEntry> newList)
-    }
-    class PriceChange__e {
-        <<Platform Event>>
-        +ProductId__c
-        +NewPrice__c
-    }
-    class EmailPriceAlert {
-        <<Observer>>
-        +onPriceChange(PriceChange__e event)
-    }
-    class SmsPriceAlert {
-        <<Observer>>
-        +onPriceChange(PriceChange__e event)
-    }
-
-    PriceChangeService --|> PriceChange__e : Publishes
-    PriceChange__e --|> EmailPriceAlert : Notifies (via Trigger)
-    PriceChange__e --|> SmsPriceAlert : Notifies (via Trigger)
-```
-
-#### Analyse de l'implémentation Apex
-Le `PriceChangeService` (le sujet) ne connaît pas ses observateurs. Il se contente de publier un événement `PriceChange__e` sur le bus d'événements de Salesforce. Des triggers Apex sur cet événement (`EmailPriceAlert`, `SmsPriceAlert`) agissent comme des observateurs. Ils s'abonnent à l'événement et se déclenchent dès qu'un nouvel événement est publié, créant un découplage total entre le publicateur et les abonnés.
-
-#### Démonstration
-```apex
-// Fichier : [Demo010] Observer.apex
-// On simule une mise à jour de prix
-PricebookEntry pbe = [SELECT Id, UnitPrice, Product2Id FROM PricebookEntry LIMIT 1];
-List<PricebookEntry> oldList = new List<PricebookEntry>{ pbe.clone() };
-pbe.UnitPrice = pbe.UnitPrice * 1.10;
-update pbe;
-List<PricebookEntry> newList = new List<PricebookEntry>{ pbe };
-
-// Le service publie l'événement. Les observateurs (triggers)
-// réagiront automatiquement en arrière-plan.
-PriceChangeService.checkAndPublish(oldList, newList);
-```
-
----
-
-### 4. Strategy
-
-> Le pattern **Strategy** est un pattern de comportement qui permet de définir une famille d'algorithmes, de les encapsuler dans des objets et de les rendre interchangeables. Le client peut ainsi varier l'algorithme utilisé indépendamment du contexte qui l'utilise.
-
-#### Diagramme de Classes
-```mermaid
-classDiagram
-    class ShippingService {
-        +static calculate(String strategyKey, Decimal amount)
-    }
-    interface IShippingStrategy {
-        <<interface>>
-        calculate(Decimal amount)
-    }
-    class StandardShipping {
-        calculate(Decimal amount)
-    }
-    class ExpressShipping {
-        calculate(Decimal amount)
-    }
-    class FreeShipping {
-        calculate(Decimal amount)
-    }
-
+    ShippingService o--> IShippingStrategy : "utilise une stratégie"
     IShippingStrategy <|.. StandardShipping
     IShippingStrategy <|.. ExpressShipping
-    IShippingStrategy <|.. FreeShipping
-    ShippingService ..> IShippingStrategy : uses
 ```
+*Légende : La flèche `A o--> B` signifie que A a une relation d'agrégation avec B.*
 
-#### Analyse de l'implémentation Apex
-Le `ShippingService` est le contexte. Au lieu d'implémenter la logique de calcul avec des `if/else` complexes, il délègue le calcul à un objet "stratégie". Dans cette démo, les stratégies sont définies dans des Custom Metadata, ce qui permet à un administrateur de modifier ou d'ajouter des stratégies de calcul de frais de port sans modifier le code Apex.
+#### Analyse de la Démo
+La démo est particulièrement puissante car elle ne se contente pas d'implémenter le pattern, elle l'intègre aux fonctionnalités de la plateforme. Le `ShippingService` reçoit une clé. Au lieu de faire un `if (key == 'Standard')`, il recherche un enregistrement de Custom Metadata correspondant à cette clé. Cet enregistrement contient le nom de la classe Apex qui implémente la stratégie. Le service utilise ensuite `Type.forName(...).newInstance()` pour créer dynamiquement l'objet stratégie adéquat. C'est flexible, maintenable et aligné avec les meilleures pratiques Salesforce.
 
-#### Démonstration
 ```apex
 // Fichier : [Demo011] Strategy-via-Custom-Metadata.apex
-List<String> keys = new List<String>{ 'Standard', 'Express', 'Free200', 'Unknown' };
+// Le client ne connaît que des clés, pas des classes Apex.
+List<String> keys = new List<String>{ 'Standard', 'Express', 'Free200' };
 
 for (String key : keys) {
-    try {
-        // Le service sélectionne la bonne stratégie en fonction de la clé
-        // et l'utilise pour effectuer le calcul.
-        Decimal fee = ShippingService.calculate(key, 150);
-        System.debug('▶️ [' + key + '] Shipping for €150 → ' + fee);
-    } catch (Exception ex) {
-        System.debug('❌ [' + key + '] Erreur : ' + ex.getMessage());
-    }
+    // Le ShippingService trouve la bonne classe stratégie via la metadata,
+    // l'instancie, et l'utilise.
+    Decimal fee = ShippingService.calculate(key, 150);
 }
 ```
 
----
+### 2. Observer : Notifier les Changements sans Couplage
 
-### 5. Decorator
+**Le Concept d'Expert :** Le pattern Observer résout un problème fondamental : comment des objets peuvent-ils réagir à des événements qui se produisent dans d'autres objets sans être directement liés à eux ? La solution est un mécanisme de diffusion où un "sujet" publie des notifications et des "observateurs" s'y abonnent. Dans Salesforce, les **Platform Events** sont l'implémentation parfaite et native de ce pattern. Ils créent un découplage total : le publicateur n'a aucune connaissance des abonnés. Cela permet de construire des architectures événementielles, résilientes et qui respectent les limites de la plateforme en découpant le travail en transactions courtes et indépendantes.
 
-> Le **Decorator** est un pattern structurel qui permet d'ajouter dynamiquement de nouvelles fonctionnalités à un objet sans modifier sa classe. Il enveloppe l'objet original dans un autre objet (le "décorateur") qui possède la même interface.
+#### Diagramme de Séquence Simplifié
 
-#### Diagramme de Classes
 ```mermaid
-classDiagram
-    interface IReportFormatter {
-        <<interface>>
-        format(Opportunity opp) List<String>
-    }
-    class DefaultReportFormatter {
-        format(Opportunity opp) List<String>
-    }
-    class FormatterDecorator {
-        <<abstract>>
-        #IReportFormatter wrappee
-        format(Opportunity opp) List<String>
-    }
-    class USADecorator {
-        format(Opportunity opp) List<String>
-    }
-    class EuropeDecorator {
-        format(Opportunity opp) List<String>
-    }
+sequenceDiagram
+    participant P as PriceChangeService
+    participant B as Event Bus
+    participant E as EmailPriceAlert (Trigger)
+    participant S as SmsPriceAlert (Trigger)
 
-    IReportFormatter <|.. DefaultReportFormatter
-    IReportFormatter <|.. FormatterDecorator
-    FormatterDecorator o-- "1" IReportFormatter : wraps
-    FormatterDecorator <|-- USADecorator
-    FormatterDecorator <|-- EuropeDecorator
+    P->>B: 1. Publie PriceChange__e
+    B-->>E: 2. Notifie l'abonné Email
+    B-->>S: 3. Notifie l'abonné SMS
 ```
 
-#### Analyse de l'implémentation Apex
-On part d'un formateur de base (`DefaultReportFormatter`). On peut ensuite l'envelopper (`decorate`) avec `USADecorator` pour ajouter le formatage de la devise en USD, puis envelopper le résultat avec `EuropeDecorator` pour convertir au format EUR. Chaque décorateur ajoute une "couche" de fonctionnalité tout en restant compatible avec l'interface `IReportFormatter`.
+#### Analyse de la Démo
+Le `PriceChangeService` fait une seule chose : il publie un `PriceChange__e`. Il ne sait pas et ne se soucie pas de savoir si un email doit être envoyé, si un SMS est nécessaire, ou si un système externe doit être appelé. Les classes `EmailPriceAlert` et `SmsPriceAlert` (implémentées sous forme de triggers sur le Platform Event) sont les observateurs. Vous pouvez ajouter un troisième observateur demain (par exemple, `PushNotificationAlert`) en ajoutant simplement un nouveau trigger, sans jamais toucher au code du `PriceChangeService`. C'est le summum du découplage.
 
-#### Démonstration
 ```apex
-// Fichier : [Demo012] Decorator .apex
-// Cette démo montre comment on peut chaîner les décorateurs
-// pour construire un comportement complexe.
-ReportGenerator.demo();
+// Fichier : [Demo010] Observer.apex
+// Le service se contente de crier "Le prix a changé !" dans le vide.
+PriceChangeService.checkAndPublish(oldList, newList);
 
-// Dans ReportGenerator.demo():
-// 1. Crée un formateur de base
-IReportFormatter formatter = new DefaultReportFormatter();
-// 2. L'enveloppe avec un premier décorateur
-formatter = new USADecorator(formatter);
-// 3. L'enveloppe avec un second décorateur
-formatter = new EuropeDecorator(formatter);
-// 4. Utilise l'objet final, entièrement décoré
-formatter.format(opp);
+// En coulisses, les triggers abonnés à cet événement se réveillent
+// et font leur travail, chacun dans sa propre transaction.
 ```
 
 ---
