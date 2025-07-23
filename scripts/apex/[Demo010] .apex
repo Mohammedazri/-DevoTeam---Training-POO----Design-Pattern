@@ -29,7 +29,7 @@ System.debug('📋 Avant/après service PriceChangeService');
 PriceChangeService.checkAndPublish(oldList, newList);
 
 // 6) (Optionnel) Invoquer directement les observers pour voir tout de suite
-new EmailPriceAlert().onPriceChange(pbe.Product2Id, newPrice);
-new SmsPriceAlert().onPriceChange(pbe.Product2Id, newPrice);
+EmailPriceAlert.send(pbe.Product2Id, newPrice);
+SmsPriceAlert.send(pbe.Product2Id, newPrice);
 
 System.debug('=== Fin de la démo PriceChangeService ===');

@@ -1,8 +1,9 @@
-// force-app/main/default/classes/EmailPriceAlert.cls
-public with sharing class EmailPriceAlert implements IPriceAlert {
-    public void onPriceChange(String productId, Decimal newPrice) {
-        // ici en prod vous feriez un Messaging.sendEmail
-        System.debug('📧 Email Alert – produit ' + productId 
-                     + ' nouveau prix = ' + newPrice);
+public with sharing class EmailPriceAlert {
+    public static void send(String productId, Decimal newPrice) {
+        System.debug('📧 [EmailPriceAlert] Sending E‑mail for product ' 
+                     + productId + ' at price ' + newPrice);
+        // … your real email logic here …
     }
 }
+
+

@@ -1,19 +1,10 @@
-// force-app/main/default/triggers/PriceChangeEvent.trigger
-trigger PriceChangeEvent on PriceChange__e (after insert) {
-    // construisez la liste d’observers que vous voulez notifier
-    List<IPriceAlert> observers = new List<IPriceAlert>{
-        new EmailPriceAlert(),
-        new SmsPriceAlert()
-        // vous pouvez en ajouter d’autres à volonté
-    };
-    
-    // pour chaque événement publié
+trigger PriceChangeEventTrigger on PriceChange__e (after insert) {
+    System.debug('--- BEGIN PriceChangeEventTrigger ---');
     for (PriceChange__e evt : Trigger.new) {
-        for (IPriceAlert obs : observers) {
-            obs.onPriceChange(
-                evt.ProductId__c,
-                evt.NewPrice__c
-            );
-        }
+        System.debug('🛎 [Trigger] Received PriceChange__e → product=' 
+                     + evt.ProductId__c + ', newPrice=' + evt.NewPrice__c);
+        EmailPriceAlert.send(evt.ProductId__c, evt.NewPrice__c);
+        SmsPriceAlert.send(evt.ProductId__c, evt.NewPrice__c);
     }
+    System.debug('--- END PriceChangeEventTrigger ---');
 }
