@@ -80,4 +80,4 @@ Chaque sujet est présenté avec une explication approfondie et des liens direct
 
 ---
 
-Projet créé par **@[DevoTeam]**.
+Projet créé par **@Mohammed AZRI**.
