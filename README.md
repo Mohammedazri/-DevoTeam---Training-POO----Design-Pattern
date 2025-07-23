@@ -1,3 +1,4 @@
+
 # Formation d'Expert : POO & Design Patterns en Apex
 
 Ce document est un guide approfondi destiné aux développeurs Salesforce qui souhaitent maîtriser la **Programmation Orientée Objet (POO)** et les **Design Patterns**. L'objectif n'est pas seulement de comprendre la théorie, mais de devenir un expert capable de concevoir des solutions Apex robustes, maintenables et évolutives.
@@ -61,7 +62,7 @@ classDiagram
     direction TD
     class Shape{
       <<abstract>>
-      +calculateArea()
+      calculateArea()
     }
     class Circle{ +calculateArea() }
     class Square{ +calculateArea() }
@@ -72,7 +73,7 @@ classDiagram
     Shape <|-- Triangle
 
     class Client{
-        +calculerToutesLesAires(List<Shape>)
+        calculerToutesLesAires(List<Shape>)
     }
     Client ..> Shape : "Le client dépend de l'abstraction, pas des détails"
 ```
@@ -105,8 +106,8 @@ for (Shape s : shapes) {
 classDiagram
     class Employe{
         -String numeroSecuriteSociale
-        +String getNumeroSecuriteSociale()
-        -void setNumeroSecuriteSociale(String ssn)
+        +getNumeroSecuriteSociale()
+        -setNumeroSecuriteSociale(String ssn)
     }
 ```
 
@@ -142,7 +143,7 @@ classDiagram
     class ShippingService{
       +calculate(strategy)
     }
-    interface IShippingStrategy{
+    class IShippingStrategy{
       <<interface>>
       calculateFee()
     }
