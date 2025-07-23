@@ -1,93 +1,81 @@
+# Guide de Formation : POO et Design Patterns en Apex
 
-# Plan de Formation : POO et Design Patterns en Apex
+Bienvenue dans ce projet d'apprentissage ! L'objectif est de vous guider à travers les concepts clés de la programmation orientée objet et les design patterns essentiels pour écrire du code Apex de haute qualité.
 
-Bienvenue dans ce projet d'apprentissage ! L'objectif est simple : vous aider à écrire du code Apex plus propre, plus efficace et plus professionnel en maîtrisant les concepts fondamentaux de la programmation et les bonnes pratiques de conception.
-
-Cette formation est divisée en trois grandes parties, allant des bases aux concepts les plus avancés.
-
----
-
-## Comment Utiliser ce Projet
-
-Chaque concept est organisé de la manière suivante :
-1.  **Le Code Source (`.cls`)** : Les classes Apex qui définissent la logique se trouvent dans le dossier `force-app/main/default/classes/`.
-2.  **La Démonstration (`.apex`)** : Un script d'exemple, prêt à être exécuté, se trouve dans le dossier `scripts/apex/` pour vous montrer le concept en action.
+Chaque sujet est organisé avec une brève explication et des liens directs vers le code source et les scripts de démonstration pour une exploration facile.
 
 ---
 
-## Plan de la Formation
+## Partie 1 : Les Bases de la Programmation Orientée Objet (POO)
 
-### Partie 1 : Les Bases de la Programmation Orientée Objet (POO)
-
-*Les concepts essentiels que tout développeur Apex doit maîtriser.*
+*Les quatre piliers sur lesquels repose tout code orienté objet bien structuré.*
 
 - **1. L'Héritage**
-  - **Concept :** Créer une classe qui en étend une autre (une `Voiture` est un `Vehicule`).
-  - **Code :** `LesBasesDePOO/HeritageEnPOO`
-  - **Démo :** `[Demo001] HeritageEnOOP.apex`
+  - **Explication :** Permet à une classe d'en hériter les propriétés et méthodes d'une autre. Utile pour réutiliser du code et créer des hiérarchies logiques (une `Voiture` est un `Vehicule`).
+  - **Code Source :** `force-app/main/default/classes/LesBasesDePOO/HeritageEnPOO`
+  - **Démonstration :** `scripts/apex/[Demo001] HeritageEnOOP.apex`
 
 - **2. Le Polymorphisme**
-  - **Concept :** Traiter des objets différents (`Cercle`, `Carré`) de la même manière.
-  - **Code :** `LesBasesDePOO/PolymorphismeEnPOO`
-  - **Démo :** `[Demo002] PolymorphismeEnOOP.apex`
+  - **Explication :** Permet de traiter des objets de types différents de manière uniforme. On peut, par exemple, calculer l'aire d'un `Cercle` ou d'un `Carré` en utilisant la même méthode.
+  - **Code Source :** `force-app/main/default/classes/LesBasesDePOO/PolymorphismeEnPOO`
+  - **Démonstration :** `scripts/apex/[Demo002] PolymorphismeEnOOP.apex`
 
 - **3. L'Encapsulation**
-  - **Concept :** Protéger les données d'un objet en contrôlant qui peut y accéder.
-  - **Code :** `LesBasesDePOO/EncapsulationEnPOO`
-  - **Démo :** `[Demo003] EncapsulationEnOOP.apex`
+  - **Explication :** Protège les données d'un objet en ne les exposant qu'à travers des méthodes publiques. Cela garantit que l'objet contrôle son propre état.
+  - **Code Source :** `force-app/main/default/classes/LesBasesDePOO/EncapsulationEnPOO`
+  - **Démonstration :** `scripts/apex/[Demo003] EncapsulationEnOOP.apex`
 
 - **4. L'Abstraction**
-  - **Concept :** Masquer les détails complexes pour ne montrer que l'essentiel.
-  - **Code :** `LesBasesDePOO/AbstractionEnPOO`
-  - **Démo :** `[Demo004] AbstractionEnOOP.apex`
+  - **Explication :** Masque la complexité interne pour n'exposer que les fonctionnalités nécessaires. Le code qui utilise l'objet n'a pas besoin de savoir *comment* il fonctionne, juste *ce qu'il fait*.
+  - **Code Source :** `force-app/main/default/classes/LesBasesDePOO/AbstractionEnPOO`
+  - **Démonstration :** `scripts/apex/[Demo004] AbstractionEnOOP.apex`
 
-### Partie 2 : Concepts Avancés de la POO
+---
 
-*Relations entre les objets et contrats de code.*
+## Partie 2 : Concepts Avancés et Relations entre Objets
 
-- **5. L'Agrégation**
-  - **Concept :** Un objet qui en "contient" d'autres (un `Panier` avec des `Articles`).
-  - **Code :** `ConceptAvancesPOO/AgregationEnPOO`
-  - **Démo :** `[Demo005] Agrégation en POO.apex`
+*Comment les objets interagissent et comment définir des contrats de code clairs.*
 
-- **6. La Composition**
-  - **Concept :** Un objet qui est "composé" d'autres (une `Maison` et ses `Pieces`).
-  - **Code :** `ConceptAvancesPOO/CompositionEnPOO`
-  - **Démo :** `[Demo006] Composition en POO.apex`
+- **5. L'Agrégation & La Composition**
+  - **Explication :** Deux manières de construire des objets complexes à partir d'objets plus simples. L'agrégation est une relation souple (un `Panier` contient des `Articles`), la composition est une relation forte (une `Maison` est faite de `Pieces`).
+  - **Code Source :** `force-app/main/default/classes/ConceptAvancesPOO/`
+  - **Démonstrations :** `scripts/apex/[Demo005]` et `[Demo006]`
 
-- **7. Les Interfaces (Implémentation Multiple)**
-  - **Concept :** Permettre à une classe d'avoir plusieurs "casquettes" (un `Document` est `Imprimable` et `Exportable`).
-  - **Code :** `ConceptAvancesPOO/ContratEtHeritageMultibleEnPOO`
-  - **Démo :** `[Demo007] Implémentation Multiple.apex`
+- **6. Les Interfaces (Implémentation Multiple)**
+  - **Explication :** Définit un "contrat" qu'une classe doit respecter. Une classe peut implémenter plusieurs interfaces, ce qui lui permet d'avoir plusieurs "casquettes" (ex: un `Document` est à la fois `Imprimable` et `Exportable`).
+  - **Code Source :** `force-app/main/default/classes/ConceptAvancesPOO/ContratEtHeritageMultibleEnPOO`
+  - **Démonstration :** `scripts/apex/[Demo007] Implémentation Multiple.apex`
 
-### Partie 3 : Les Design Patterns Essentiels
+---
 
-*Solutions éprouvées aux problèmes de conception courants.*
+## Partie 3 : Les Design Patterns Essentiels
 
-- **8. Singleton**
-  - **Concept :** S'assurer qu'une classe n'a qu'une seule et unique instance.
-  - **Code :** `SystemDesignPatterns/Singleton`
-  - **Démo :** `[Demo008] Singleton.apex`
+*Solutions éprouvées aux problèmes de conception courants pour un code flexible et maintenable.*
 
-- **9. Factory Method**
-  - **Concept :** Laisser une "usine" décider quel type d'objet créer pour nous.
-  - **Code :** `SystemDesignPatterns/FactoryMethod`
-  - **Démo :** `[Demo009] Factory Method.apex`
+- **7. Singleton**
+  - **Explication :** Garantit qu'il n'existe qu'une seule et unique instance d'une classe. Parfait pour gérer des services partagés comme un logger.
+  - **Code Source :** `force-app/main/default/classes/SystemDesignPatterns/Singleton`
+  - **Démonstration :** `scripts/apex/[Demo008] Singleton.apex`
 
-- **10. Observer**
-  - **Concept :** Notifier automatiquement d'autres objets quand un événement se produit (ex: changement de prix).
-  - **Code :** `SystemDesignPatterns/Observer`
-  - **Démo :** `[Demo010] Observer.apex`
+- **8. Factory Method**
+  - **Explication :** Délègue la création d'objets à une classe "usine" (Factory). Le code client demande un objet sans avoir à connaître les détails de sa création.
+  - **Code Source :** `force-app/main/default/classes/SystemDesignPatterns/FactoryMethod`
+  - **Démonstration :** `scripts/apex/[Demo009] Factory Method.apex`
 
-- **11. Strategy**
-  - **Concept :** Rendre des algorithmes interchangeables (ex: différentes méthodes de calcul de frais de port).
-  - **Code :** `SystemDesignPatterns/Strategy`
-  - **Démo :** `[Demo011] Strategy‐via‐Custom‐Metadata.apex`
+- **9. Observer**
+  - **Explication :** Permet à des objets de "s'abonner" aux changements d'un autre objet sans y être directement liés. Idéal pour des notifications (ex: alerter quand un prix change).
+  - **Code Source :** `force-app/main/default/classes/SystemDesignPatterns/Observer`
+  - **Démonstration :** `scripts/apex/[Demo010] Observer.apex`
 
-- **12. Decorator**
-  - **Concept :** Ajouter de nouvelles fonctionnalités à un objet de manière flexible.
-  - **Code :** `SystemDesignPatterns/Décorateur`
-  - **Démo :** `[Demo012] Decorator .apex`
+- **10. Strategy**
+  - **Explication :** Rend des algorithmes interchangeables. Permet de changer de comportement à la volée (ex: choisir une méthode de calcul de frais de port).
+  - **Code Source :** `force-app/main/default/classes/SystemDesignPatterns/Strategy`
+  - **Démonstration :** `scripts/apex/[Demo011] Strategy‐via‐Custom‐Metadata.apex`
+
+- **11. Decorator**
+  - **Explication :** Ajoute de nouvelles fonctionnalités à un objet de manière dynamique, comme si on l'enveloppait dans des couches successives.
+  - **Code Source :** `force-app/main/default/classes/SystemDesignPatterns/Décorateur`
+  - **Démonstration :** `scripts/apex/[Demo012] Decorator .apex`
 
 ---
 
